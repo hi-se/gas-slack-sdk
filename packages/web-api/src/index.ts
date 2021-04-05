@@ -12,6 +12,8 @@ export {
   TLSOptions,
 } from './WebClient';
 
+export { GasWebClient } from './GasWebClient'
+
 export { Logger, LogLevel } from './logger';
 
 export {
