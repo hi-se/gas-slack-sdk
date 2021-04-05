@@ -213,9 +213,9 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
     super();
 
     // Check that the class being created extends from `WebClient` rather than this class
-    if (new.target !== WebClient && !(new.target.prototype instanceof WebClient)) {
-      throw new Error('Attempt to inherit from WebClient methods without inheriting from WebClient');
-    }
+    // if (new.target !== WebClient && !(new.target.prototype instanceof WebClient)) {
+    //   throw new Error('Attempt to inherit from WebClient methods without inheriting from WebClient');
+    // }
   }
 
   public abstract apiCall(method: string, options?: WebAPICallOptions): Promise<WebAPICallResult>;
