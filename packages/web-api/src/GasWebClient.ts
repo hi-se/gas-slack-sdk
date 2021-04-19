@@ -50,9 +50,8 @@ export class GasWebClient extends Methods {
     ));
     return response;
   }
-  private async makeRequest(url: string, body: any, headers: any = {}) {
+  private async makeRequest(url: string, body: any) {
     const response = this._post(url, body);
-    console.log(response.getContentText());
     return JSON.parse(response.getContentText());
   }
   protected _get(api: string, args: Record<string, any> = {}): any {
@@ -77,11 +76,10 @@ export class GasWebClient extends Methods {
     return this._fetch(url, params)
   }
 
-  protected _fetch(url: string, params: Record<string, any> = null): GoogleAppsScript.URL_Fetch.HTTPResponse {
+  protected _fetch(url: string, params: Record<string, any> = {}): GoogleAppsScript.URL_Fetch.HTTPResponse {
     let response: any = null
     for (let retry = 0; retry < this._retries_limit; retry++) {
       try {
-        console.log(UrlFetchApp.getRequest(url, params));
         response = UrlFetchApp.fetch(url, params)
       } catch (e) {
         throw e
