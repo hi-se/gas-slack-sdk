@@ -42,12 +42,10 @@ export class GasWebClient extends Methods {
     this._retries_limit = DEFAULT_RETRIES
   }
   public async apiCall(method: string, options?: WebAPICallOptions): Promise<any> {
-    const response = await this.makeRequest(method, Object.assign(
-      {
-        token: this.token
-      },
-      options,
-    ));
+    const response = await this.makeRequest(method, {
+      token: this.token,
+      ...options
+    });
     return response;
   }
   private async makeRequest(url: string, body: any) {
