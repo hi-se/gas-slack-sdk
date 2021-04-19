@@ -2,6 +2,10 @@
 /node_modules
 /package-lock.json
 
+# yarn stuff
+.tool-versions
+yarn.lock
+
 # build products
 /dist
 
