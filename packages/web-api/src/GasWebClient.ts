@@ -41,14 +41,14 @@ export class GasWebClient extends Methods {
     this.slackApiUrl = slackApiUrl;
     this._retries_limit = DEFAULT_RETRIES
   }
-  public async apiCall(method: string, options?: WebAPICallOptions): Promise<any> {
-    const response = await this.makeRequest(method, {
+  public apiCall(method: string, options?: WebAPICallOptions): any {
+    const response = this.makeRequest(method, {
       token: this.token,
       ...options
     });
     return response;
   }
-  private async makeRequest(url: string, body: any) {
+  private makeRequest(url: string, body: any) {
     const response = this._post(url, body);
     return JSON.parse(response.getContentText());
   }

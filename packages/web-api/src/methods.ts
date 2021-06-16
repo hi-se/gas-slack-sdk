@@ -218,7 +218,7 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
     // }
   }
 
-  public abstract apiCall(method: string, options?: WebAPICallOptions): Promise<WebAPICallResult>;
+  public abstract apiCall(method: string, options?: WebAPICallOptions): WebAPICallResult;
 
   public readonly admin = {
     apps: {
@@ -660,7 +660,7 @@ export default interface Method<
   MethodArguments extends WebAPICallOptions,
   MethodResult extends WebAPICallResult = WebAPICallResult
   > {
-  (options?: MethodArguments): Promise<MethodResult>;
+  (options?: MethodArguments): MethodResult;
 }
 
 /*
