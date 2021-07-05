@@ -182,6 +182,8 @@ import { WorkflowsUpdateStepResponse } from './response/WorkflowsUpdateStepRespo
 import { AdminUsersSessionGetSettingsResponse } from './response/AdminUsersSessionGetSettingsResponse';
 import { AdminUsersSessionSetSettingsResponse } from './response/AdminUsersSessionSetSettingsResponse';
 import { AdminUsersSessionClearSettingsResponse } from './response/AdminUsersSessionClearSettingsResponse';
+import { AdminAppsClearResolutionResponse } from './response/AdminAppsClearResolutionResponse';
+import { AdminAppsUninstallResponse } from './response/AdminAppsUninstallResponse';
 
 // NOTE: could create a named type alias like data types like `SlackUserID: string`
 
@@ -221,11 +223,13 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
   public abstract apiCall(method: string, options?: WebAPICallOptions): WebAPICallResult | Promise<WebAPICallResult>;
 
   public readonly admin = {
+    // TODO: admin.analytics.getFile
     apps: {
       approve: bindApiCall<AdminAppsApproveArguments, AdminAppsApproveResponse>(this, 'admin.apps.approve'),
       approved: {
         list: bindApiCall<AdminAppsApprovedListArguments, AdminAppsApprovedListResponse>(this, 'admin.apps.approved.list'),
       },
+      clearResolution: bindApiCall<AdminAppsClearResolutionArguments, AdminAppsClearResolutionResponse>(this, 'admin.apps.clearResolution'),
       requests: {
         list: bindApiCall<AdminAppsRequestsListArguments, AdminAppsRequestsListResponse>(this, 'admin.apps.requests.list'),
       },
@@ -234,6 +238,7 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
         list:
           bindApiCall<AdminAppsRestrictedListArguments, AdminAppsRestrictedListResponse>(this, 'admin.apps.restricted.list'),
       },
+      uninstall: bindApiCall<AdminAppsUninstallArguments, AdminAppsUninstallResponse>(this, 'admin.apps.uninstall'),
     },
     barriers: {
       create: bindApiCall<AdminBarriersCreateArguments, AdminBarriersCreateResponse>(this, 'admin.barriers.create'),
@@ -412,24 +417,6 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
     },
   };
 
-  public readonly channels = {
-    archive: bindApiCall<ChannelsArchiveArguments, WebAPICallResult>(this, 'channels.archive'),
-    create: bindApiCall<ChannelsCreateArguments, WebAPICallResult>(this, 'channels.create'),
-    history: bindApiCall<ChannelsHistoryArguments, WebAPICallResult>(this, 'channels.history'),
-    info: bindApiCall<ChannelsInfoArguments, WebAPICallResult>(this, 'channels.info'),
-    invite: bindApiCall<ChannelsInviteArguments, WebAPICallResult>(this, 'channels.invite'),
-    join: bindApiCall<ChannelsJoinArguments, WebAPICallResult>(this, 'channels.join'),
-    kick: bindApiCall<ChannelsKickArguments, WebAPICallResult>(this, 'channels.kick'),
-    leave: bindApiCall<ChannelsLeaveArguments, WebAPICallResult>(this, 'channels.leave'),
-    list: bindApiCall<ChannelsListArguments, WebAPICallResult>(this, 'channels.list'),
-    mark: bindApiCall<ChannelsMarkArguments, WebAPICallResult>(this, 'channels.mark'),
-    rename: bindApiCall<ChannelsRenameArguments, WebAPICallResult>(this, 'channels.rename'),
-    replies: bindApiCall<ChannelsRepliesArguments, WebAPICallResult>(this, 'channels.replies'),
-    setPurpose: bindApiCall<ChannelsSetPurposeArguments, WebAPICallResult>(this, 'channels.setPurpose'),
-    setTopic: bindApiCall<ChannelsSetTopicArguments, WebAPICallResult>(this, 'channels.setTopic'),
-    unarchive: bindApiCall<ChannelsUnarchiveArguments, WebAPICallResult>(this, 'channels.unarchive'),
-  };
-
   public readonly chat = {
     delete: bindApiCall<ChatDeleteArguments, ChatDeleteResponse>(this, 'chat.delete'),
     deleteScheduledMessage:
@@ -473,13 +460,6 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
       this, 'conversations.unarchive'),
   };
 
-  public readonly views = {
-    open: bindApiCall<ViewsOpenArguments, ViewsOpenResponse>(this, 'views.open'),
-    publish: bindApiCall<ViewsPublishArguments, ViewsPublishResponse>(this, 'views.publish'),
-    push: bindApiCall<ViewsPushArguments, ViewsPushResponse>(this, 'views.push'),
-    update: bindApiCall<ViewsUpdateArguments, ViewsUpdateResponse>(this, 'views.update'),
-  };
-
   public readonly dialog = {
     open: bindApiCall<DialogOpenArguments, DialogOpenResponse>(this, 'dialog.open'),
   };
@@ -518,45 +498,8 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
     },
   };
 
-  public readonly groups = {
-    archive: bindApiCall<GroupsArchiveArguments, WebAPICallResult>(this, 'groups.archive'),
-    create: bindApiCall<GroupsCreateArguments, WebAPICallResult>(this, 'groups.create'),
-    createChild: bindApiCall<GroupsCreateChildArguments, WebAPICallResult>(this, 'groups.createChild'),
-    history: bindApiCall<GroupsHistoryArguments, WebAPICallResult>(this, 'groups.history'),
-    info: bindApiCall<GroupsInfoArguments, WebAPICallResult>(this, 'groups.info'),
-    invite: bindApiCall<GroupsInviteArguments, WebAPICallResult>(this, 'groups.invite'),
-    kick: bindApiCall<GroupsKickArguments, WebAPICallResult>(this, 'groups.kick'),
-    leave: bindApiCall<GroupsLeaveArguments, WebAPICallResult>(this, 'groups.leave'),
-    list: bindApiCall<GroupsListArguments, WebAPICallResult>(this, 'groups.list'),
-    mark: bindApiCall<GroupsMarkArguments, WebAPICallResult>(this, 'groups.mark'),
-    open: bindApiCall<GroupsOpenArguments, WebAPICallResult>(this, 'groups.open'),
-    rename: bindApiCall<GroupsRenameArguments, WebAPICallResult>(this, 'groups.rename'),
-    replies: bindApiCall<GroupsRepliesArguments, WebAPICallResult>(this, 'groups.replies'),
-    setPurpose: bindApiCall<GroupsSetPurposeArguments, WebAPICallResult>(this, 'groups.setPurpose'),
-    setTopic: bindApiCall<GroupsSetTopicArguments, WebAPICallResult>(this, 'groups.setTopic'),
-    unarchive: bindApiCall<GroupsUnarchiveArguments, WebAPICallResult>(this, 'groups.unarchive'),
-  };
-
-  public readonly im = {
-    close: bindApiCall<IMCloseArguments, WebAPICallResult>(this, 'im.close'),
-    history: bindApiCall<IMHistoryArguments, WebAPICallResult>(this, 'im.history'),
-    list: bindApiCall<IMListArguments, WebAPICallResult>(this, 'im.list'),
-    mark: bindApiCall<IMMarkArguments, WebAPICallResult>(this, 'im.mark'),
-    open: bindApiCall<IMOpenArguments, WebAPICallResult>(this, 'im.open'),
-    replies: bindApiCall<IMRepliesArguments, WebAPICallResult>(this, 'im.replies'),
-  };
-
   public readonly migration = {
     exchange: bindApiCall<MigrationExchangeArguments, MigrationExchangeResponse>(this, 'migration.exchange'),
-  };
-
-  public readonly mpim = {
-    close: bindApiCall<MPIMCloseArguments, WebAPICallResult>(this, 'mpim.close'),
-    history: bindApiCall<MPIMHistoryArguments, WebAPICallResult>(this, 'mpim.history'),
-    list: bindApiCall<MPIMListArguments, WebAPICallResult>(this, 'mpim.list'),
-    mark: bindApiCall<MPIMMarkArguments, WebAPICallResult>(this, 'mpim.mark'),
-    open: bindApiCall<MPIMOpenArguments, WebAPICallResult>(this, 'mpim.open'),
-    replies: bindApiCall<MPIMRepliesArguments, WebAPICallResult>(this, 'mpim.replies'),
   };
 
   public readonly oauth = {
@@ -645,12 +588,79 @@ export abstract class Methods extends EventEmitter<WebClientEvent> {
     },
   };
 
+  public readonly views = {
+    open: bindApiCall<ViewsOpenArguments, ViewsOpenResponse>(this, 'views.open'),
+    publish: bindApiCall<ViewsPublishArguments, ViewsPublishResponse>(this, 'views.publish'),
+    push: bindApiCall<ViewsPushArguments, ViewsPushResponse>(this, 'views.push'),
+    update: bindApiCall<ViewsUpdateArguments, ViewsUpdateResponse>(this, 'views.update'),
+  };
+
   public readonly workflows = {
     stepCompleted: bindApiCall<WorkflowsStepCompletedArguments, WorkflowsStepCompletedResponse>(
       this, 'workflows.stepCompleted'),
     stepFailed: bindApiCall<WorkflowsStepFailedArguments, WorkflowsStepFailedResponse>(this, 'workflows.stepFailed'),
     updateStep: bindApiCall<WorkflowsUpdateStepArguments, WorkflowsUpdateStepResponse>(this, 'workflows.updateStep'),
   };
+
+  // ---------------------------------
+  // Deprecated methods
+  // ---------------------------------
+
+  public readonly channels = {
+    archive: bindApiCall<ChannelsArchiveArguments, WebAPICallResult>(this, 'channels.archive'),
+    create: bindApiCall<ChannelsCreateArguments, WebAPICallResult>(this, 'channels.create'),
+    history: bindApiCall<ChannelsHistoryArguments, WebAPICallResult>(this, 'channels.history'),
+    info: bindApiCall<ChannelsInfoArguments, WebAPICallResult>(this, 'channels.info'),
+    invite: bindApiCall<ChannelsInviteArguments, WebAPICallResult>(this, 'channels.invite'),
+    join: bindApiCall<ChannelsJoinArguments, WebAPICallResult>(this, 'channels.join'),
+    kick: bindApiCall<ChannelsKickArguments, WebAPICallResult>(this, 'channels.kick'),
+    leave: bindApiCall<ChannelsLeaveArguments, WebAPICallResult>(this, 'channels.leave'),
+    list: bindApiCall<ChannelsListArguments, WebAPICallResult>(this, 'channels.list'),
+    mark: bindApiCall<ChannelsMarkArguments, WebAPICallResult>(this, 'channels.mark'),
+    rename: bindApiCall<ChannelsRenameArguments, WebAPICallResult>(this, 'channels.rename'),
+    replies: bindApiCall<ChannelsRepliesArguments, WebAPICallResult>(this, 'channels.replies'),
+    setPurpose: bindApiCall<ChannelsSetPurposeArguments, WebAPICallResult>(this, 'channels.setPurpose'),
+    setTopic: bindApiCall<ChannelsSetTopicArguments, WebAPICallResult>(this, 'channels.setTopic'),
+    unarchive: bindApiCall<ChannelsUnarchiveArguments, WebAPICallResult>(this, 'channels.unarchive'),
+  };
+
+  public readonly groups = {
+    archive: bindApiCall<GroupsArchiveArguments, WebAPICallResult>(this, 'groups.archive'),
+    create: bindApiCall<GroupsCreateArguments, WebAPICallResult>(this, 'groups.create'),
+    createChild: bindApiCall<GroupsCreateChildArguments, WebAPICallResult>(this, 'groups.createChild'),
+    history: bindApiCall<GroupsHistoryArguments, WebAPICallResult>(this, 'groups.history'),
+    info: bindApiCall<GroupsInfoArguments, WebAPICallResult>(this, 'groups.info'),
+    invite: bindApiCall<GroupsInviteArguments, WebAPICallResult>(this, 'groups.invite'),
+    kick: bindApiCall<GroupsKickArguments, WebAPICallResult>(this, 'groups.kick'),
+    leave: bindApiCall<GroupsLeaveArguments, WebAPICallResult>(this, 'groups.leave'),
+    list: bindApiCall<GroupsListArguments, WebAPICallResult>(this, 'groups.list'),
+    mark: bindApiCall<GroupsMarkArguments, WebAPICallResult>(this, 'groups.mark'),
+    open: bindApiCall<GroupsOpenArguments, WebAPICallResult>(this, 'groups.open'),
+    rename: bindApiCall<GroupsRenameArguments, WebAPICallResult>(this, 'groups.rename'),
+    replies: bindApiCall<GroupsRepliesArguments, WebAPICallResult>(this, 'groups.replies'),
+    setPurpose: bindApiCall<GroupsSetPurposeArguments, WebAPICallResult>(this, 'groups.setPurpose'),
+    setTopic: bindApiCall<GroupsSetTopicArguments, WebAPICallResult>(this, 'groups.setTopic'),
+    unarchive: bindApiCall<GroupsUnarchiveArguments, WebAPICallResult>(this, 'groups.unarchive'),
+  };
+
+  public readonly im = {
+    close: bindApiCall<IMCloseArguments, WebAPICallResult>(this, 'im.close'),
+    history: bindApiCall<IMHistoryArguments, WebAPICallResult>(this, 'im.history'),
+    list: bindApiCall<IMListArguments, WebAPICallResult>(this, 'im.list'),
+    mark: bindApiCall<IMMarkArguments, WebAPICallResult>(this, 'im.mark'),
+    open: bindApiCall<IMOpenArguments, WebAPICallResult>(this, 'im.open'),
+    replies: bindApiCall<IMRepliesArguments, WebAPICallResult>(this, 'im.replies'),
+  };
+
+  public readonly mpim = {
+    close: bindApiCall<MPIMCloseArguments, WebAPICallResult>(this, 'mpim.close'),
+    history: bindApiCall<MPIMHistoryArguments, WebAPICallResult>(this, 'mpim.history'),
+    list: bindApiCall<MPIMListArguments, WebAPICallResult>(this, 'mpim.list'),
+    mark: bindApiCall<MPIMMarkArguments, WebAPICallResult>(this, 'mpim.mark'),
+    open: bindApiCall<MPIMOpenArguments, WebAPICallResult>(this, 'mpim.open'),
+    replies: bindApiCall<MPIMRepliesArguments, WebAPICallResult>(this, 'mpim.replies'),
+  };
+
 }
 
 /**
@@ -718,6 +728,11 @@ export interface AdminAppsApprovedListArguments extends WebAPICallOptions, Token
   team_id?: string;
   enterprise_id?: string;
 }
+export interface AdminAppsClearResolutionArguments extends WebAPICallOptions {
+  app_id: string;
+  enterprise_id?: string;
+  team_id?: string;
+}
 cursorPaginationEnabledMethods.add('admin.apps.approved.list');
 export interface AdminAppsRequestsListArguments extends WebAPICallOptions, TokenOverridable, CursorPaginationEnabled {
   team_id?: string;
@@ -734,6 +749,11 @@ export interface AdminAppsRestrictedListArguments extends WebAPICallOptions, Tok
 }
 cursorPaginationEnabledMethods.add('admin.apps.restricted.list');
 
+export interface AdminAppsUninstallArguments extends WebAPICallOptions {
+  app_id: string;
+  enterprise_id?: string;
+  team_ids?: string[];
+}
 export interface AdminBarriersCreateArguments extends WebAPICallOptions, TokenOverridable {
   barriered_from_usergroup_ids: string[];
   primary_usergroup_id: string;
@@ -1180,6 +1200,10 @@ export interface ChatPostEphemeralArguments extends WebAPICallOptions, TokenOver
   blocks?: (KnownBlock | Block)[];
   link_names?: boolean;
   parse?: 'full' | 'none';
+  thread_ts?: string;
+  icon_emoji?: string; // if specified, as_user must be false
+  icon_url?: string; // if specified, as_user must be false
+  username?: string; // if specified, as_user must be false
 }
 export interface ChatPostMessageArguments extends WebAPICallOptions, TokenOverridable {
   channel: string;
@@ -1188,7 +1212,7 @@ export interface ChatPostMessageArguments extends WebAPICallOptions, TokenOverri
   attachments?: MessageAttachment[];
   blocks?: (KnownBlock | Block)[];
   icon_emoji?: string; // if specified, as_user must be false
-  icon_url?: string;
+  icon_url?: string; // if specified, as_user must be false
   link_names?: boolean;
   mrkdwn?: boolean;
   parse?: 'full' | 'none';
@@ -1201,7 +1225,7 @@ export interface ChatPostMessageArguments extends WebAPICallOptions, TokenOverri
 export interface ChatScheduleMessageArguments extends WebAPICallOptions, TokenOverridable {
   channel: string;
   text?: string;
-  post_at: string;
+  post_at: string | number;
   as_user?: boolean;
   attachments?: MessageAttachment[];
   blocks?: (KnownBlock | Block)[];
@@ -1218,6 +1242,7 @@ export interface ChatScheduledMessagesListArguments extends WebAPICallOptions, T
   channel: string;
   latest: number;
   oldest: number;
+  team_id?: string; // required if org token is used
 }
 cursorPaginationEnabledMethods.add('chat.scheduledMessages.list');
 export interface ChatUnfurlArguments extends WebAPICallOptions, TokenOverridable {
@@ -1261,6 +1286,7 @@ export interface ConversationsHistoryArguments extends WebAPICallOptions, TokenO
 cursorPaginationEnabledMethods.add('conversations.history');
 export interface ConversationsInfoArguments extends WebAPICallOptions, TokenOverridable, LocaleAware {
   channel: string;
+  include_num_members?: boolean;
 }
 export interface ConversationsInviteArguments extends WebAPICallOptions, TokenOverridable {
   channel: string;
@@ -1363,6 +1389,7 @@ export interface FilesListArguments extends WebAPICallOptions, TokenOverridable,
   ts_from?: string;
   ts_to?: string;
   types?: string; // comma-separated list of file types
+  show_files_hidden_by_limit?: boolean;
   team_id?: string;
 }
 export interface FilesRevokePublicURLArguments extends WebAPICallOptions, TokenOverridable {
@@ -1707,7 +1734,11 @@ export interface TeamBillableInfoArguments extends WebAPICallOptions, TokenOverr
   user?: string;
   team_id?: string;
 }
-export interface TeamInfoArguments extends WebAPICallOptions, TokenOverridable { }
+export interface TeamInfoArguments extends WebAPICallOptions, TokenOverridable {
+  // Team to get info on, if omitted, will return information about the current team.
+  // Will only return team that the authenticated token is allowed to see through external shared channels
+  team?: string;
+}
 export interface TeamIntegrationLogsArguments extends WebAPICallOptions, TokenOverridable {
   app_id?: string;
   change_type?: string; // TODO: list types: 'x' | 'y' | 'z'
@@ -1849,7 +1880,17 @@ export interface WorkflowsStepFailedArguments extends WebAPICallOptions, TokenOv
 
 export interface WorkflowsUpdateStepArguments extends WebAPICallOptions, TokenOverridable {
   workflow_step_edit_id: string;
-  inputs?: object;
+  step_image_url?: string;
+  step_name?: string;
+  inputs?: {
+    [name: string]: {
+      value: any;
+      skip_variable_replacement?: boolean;
+      variables?: {
+        [key: string]: any;
+      };
+    },
+  };
   outputs?: {
     type: string;
     name: string;

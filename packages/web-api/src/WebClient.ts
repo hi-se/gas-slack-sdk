@@ -15,6 +15,7 @@ import PQueue from 'p-queue'; // tslint:disable-line:import-name
 import pRetry, { AbortError } from 'p-retry';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import FormData from 'form-data'; // tslint:disable-line:import-name
+import isElectron from 'is-electron';
 
 import { Methods, CursorPaginationEnabled, cursorPaginationEnabledMethods } from './methods';
 import { getUserAgent } from './instrument';
@@ -89,11 +90,12 @@ export class WebClient extends Methods {
   constructor(token?: string, {
     slackApiUrl = 'https://slack.com/api/',
     logger = undefined,
-    logLevel = LogLevel.INFO,
+    logLevel = undefined,
     maxRequestConcurrency = 3,
     retryConfig = retryPolicies.tenRetriesInAboutThirtyMinutes,
     agent = undefined,
     tls = undefined,
+    timeout = 0,
     rejectRateLimitedCalls = false,
     headers = {},
     teamId = undefined,
@@ -117,17 +119,13 @@ export class WebClient extends Methods {
         this.logger.debug('The logLevel given to WebClient was ignored as you also gave logger');
       }
     } else {
-      this.logger = getLogger(WebClient.loggerName, logLevel, logger);
+      this.logger = getLogger(WebClient.loggerName, logLevel ?? LogLevel.INFO, logger);
     }
 
     this.axios = axios.create({
+      timeout,
       baseURL: slackApiUrl,
-      headers: Object.assign(
-        {
-          'User-Agent': getUserAgent(),
-        },
-        headers,
-      ),
+      headers: isElectron() ? headers : Object.assign({ 'User-Agent': getUserAgent() }, headers),
       httpAgent: agent,
       httpsAgent: agent,
       transformRequest: [this.serializeApiCallOptions.bind(this)],
@@ -156,6 +154,7 @@ export class WebClient extends Methods {
 
     warnDeprecations(method, this.logger);
     warnIfFallbackIsMissing(method, this.logger, options);
+    warnIfThreadTsIsNotString(method, this.logger, options);
 
     if (typeof options === 'string' || typeof options === 'number' || typeof options === 'boolean') {
       throw new TypeError(`Expected an options argument but instead received a ${typeof options}`);
@@ -499,6 +498,7 @@ export interface WebClientOptions {
   retryConfig?: RetryOptions;
   agent?: Agent;
   tls?: TLSOptions;
+  timeout?: number;
   rejectRateLimitedCalls?: boolean;
   headers?: object;
   teamId?: string;
@@ -619,6 +619,7 @@ function warnDeprecations(method: string, logger: Logger): void {
  * Log a warning when using chat.postMessage without text argument or attachments with fallback argument
  * @param method api method being called
  * @param logger instance of we clients logger
+ * @param options arguments for the Web API method
  */
 function warnIfFallbackIsMissing(method: string, logger: Logger, options?: WebAPICallOptions): void {
   const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'chat.update'];
@@ -643,5 +644,20 @@ function warnIfFallbackIsMissing(method: string, logger: Logger, options?: WebAP
     } else {
       logger.warn(buildWarningMessage('text'));
     }
+  }
+}
+
+/**
+ * Log a warning when thread_ts is not a string
+ * @param method api method being called
+ * @param logger instance of web clients logger
+ * @param options arguments for the Web API method
+ */
+function warnIfThreadTsIsNotString(method: string, logger: Logger, options?: WebAPICallOptions): void {
+  const targetMethods = ['chat.postEphemeral', 'chat.postMessage', 'chat.scheduleMessage', 'files.upload'];
+  const isTargetMethod = targetMethods.includes(method);
+
+  if (isTargetMethod && options?.thread_ts !== undefined && typeof options?.thread_ts !== 'string') {
+    logger.warn(`The given thread_ts value in the request payload for a ${method} call is a float value. We highly recommend using a string value instead.`);
   }
 }

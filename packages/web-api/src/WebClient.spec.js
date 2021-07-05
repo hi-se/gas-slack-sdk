@@ -13,6 +13,7 @@ const { CaptureConsole } = require('@aoberoi/capture-console');
 const nock = require('nock');
 const Busboy = require('busboy');
 const sinon = require('sinon');
+const axios = require('axios').default;
 
 const token = 'xoxb-faketoken';
 
@@ -29,6 +30,20 @@ describe('WebClient', function () {
     it('should build a client without a token', function () {
       const client = new WebClient();
       assert.instanceOf(client, WebClient);
+    });
+    it('should not modify global defaults in axios', function () {
+      // https://github.com/slackapi/node-slack-sdk/issues/1037
+      const client = new WebClient();
+
+      const globalDefault = axios.defaults.headers.post['Content-Type'];
+      // The axios.default's defaults should not be modified.
+      // Specifically, defaults.headers.post should be kept as-is
+      assert.exists(globalDefault);
+
+      const instanceDefault = client.axios.defaults.headers.post['Content-Type'];
+      // WebClient intentionally removes the default Content-Type
+      // from the underlying AxiosInstance used for performing web API calls
+      assert.notExists(instanceDefault)
     });
   });
 
@@ -97,6 +112,46 @@ describe('WebClient', function () {
     });
     afterEach(function () {
       this.capture.stopCapture();
+    });
+  });
+
+  describe('has an option to override the Axios timeout value', function () {
+    it('should log warning and throw error if timeout exceeded', function (done) {
+      const timeoutOverride = 1; // ms, guaranteed failure
+      
+      const logger = {
+        debug: sinon.spy(),
+        info: sinon.spy(),
+        warn: sinon.spy(),
+        error: sinon.spy(),
+        setLevel: sinon.spy(),
+        setName: sinon.spy(),
+      };
+      
+      const client = new WebClient(undefined, { 
+        timeout: timeoutOverride, 
+        retryConfig: { retries: 0 },
+        logLevel: LogLevel.WARN, 
+        logger 
+      });  
+      
+      client.apiCall('users.list')
+        .then(_ => {
+          done(new Error("expected timeout to throw error"));
+        })
+        .catch(error => {
+          try {
+            assert.isTrue(logger.warn.calledOnce, 'expected Logger to be called once');
+            assert.instanceOf(error, Error);
+            assert.equal(error.code, ErrorCode.RequestError);
+            assert.equal(error.original.config.timeout, timeoutOverride);
+            assert.equal(error.original.isAxiosError, true);
+            assert.equal(error.original.request.aborted, true);
+            done();
+          } catch (err) {
+            done(err);
+          }
+        }); 
     });
   });
 
@@ -212,6 +267,57 @@ describe('WebClient', function () {
             });
         });
       });
+
+      const threadTsTestPatterns = [
+        { method: 'chat.postEphemeral' },
+        { method: 'chat.postMessage' },
+        { method: 'chat.scheduleMessage' },
+        { method: 'files.upload' },
+      ];
+
+      threadTsTestPatterns.reduce((acc, { method, args }) => {
+        const threadTs = [{ thread_ts: 1503435956.000247, text: 'text' }]
+          .map(v => ({ method, args: Object.assign({}, v, args) }))
+        return acc.concat(threadTs)
+      }, []).forEach(({ method, args }) => {
+        it(`should send warning to logs when thread_ts in ${method} arguments is a float`, function () {
+          const logger = {
+            debug: sinon.spy(),
+            info: sinon.spy(),
+            warn: sinon.spy(),
+            error: sinon.spy(),
+            setLevel: sinon.spy(),
+            setName: sinon.spy(),
+          };
+          const warnClient = new WebClient(token, { logLevel: LogLevel.WARN, logger });
+          return warnClient.apiCall(method, args)
+            .then(() => {
+              assert.isTrue(logger.warn.callCount === 4);
+            });
+        });
+      });
+
+      threadTsTestPatterns.reduce((acc, { method, args }) => {
+        const threadTs = [{ thread_ts: '1503435956.000247', text: 'text' }]
+          .map(v => ({ method, args: Object.assign({}, v, args) }))
+        return acc.concat(threadTs)
+      }, []).forEach(({ method, args }) => {
+        it(`should not send warning to logs when thread_ts in ${method} arguments is a string`, function () {
+          const logger = {
+            debug: sinon.spy(),
+            info: sinon.spy(),
+            warn: sinon.spy(),
+            error: sinon.spy(),
+            setLevel: sinon.spy(),
+            setName: sinon.spy(),
+          };
+          const warnClient = new WebClient(token, { logLevel: LogLevel.WARN, logger });
+          return warnClient.apiCall(method, args)
+            .then(() => {
+              assert.isTrue(logger.warn.calledThrice);
+            });
+        });
+      });
     });
 
     describe('with OAuth scopes in the response headers', function () {
@@ -255,15 +361,14 @@ describe('WebClient', function () {
     });
 
     describe('when an API call fails', function () {
-      beforeEach(function () {
-        this.scope = nock('https://slack.com')
-          .post(/api/)
-          .reply(500);
-      });
-
       it('should return a Promise which rejects on error', function (done) {
-        const r = this.client.apiCall('method')
-        r.catch((error) => {
+        const client = new WebClient(undefined, { retryConfig: { retries: 0 } });
+        
+        this.scope = nock('https://slack.com')
+            .post(/api/)
+            .reply(500);
+
+        client.apiCall('method').catch((error) => {
           assert.instanceOf(error, Error);
           this.scope.done();
           done();

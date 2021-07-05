@@ -40,6 +40,7 @@ export interface Message {
   username?:          string;
   parent_user_id?:    string;
   is_locked?:         boolean;
+  inviter?:           string;
 }
 
 export interface Block {
@@ -83,6 +84,7 @@ export interface Element {
   default_to_current_conversation?: boolean;
   filter?:                          Filter;
   initial_date?:                    string;
+  initial_time?:                    string;
   initial_option?:                  InitialOption;
   min_query_length?:                number;
   image_url?:                       string;

@@ -337,14 +337,14 @@ const installer = new InstallProvider({
 
 ### Examples
 
-*  [OAuth Express app](../../examples/oauth-v2/README.md). This example uses [Keyv](https://github.com/lukechilds/keyv) library as an installation store.
-*  [classic Slack App](../../examples/oauth-v1/README.md). This example uses the built-in installation store
+*  [OAuth Express app](https://github.com/slackapi/node-slack-sdk/tree/main/examples/oauth-v2/README.md). This example uses [Keyv](https://github.com/lukechilds/keyv) library as an installation store.
+*  [classic Slack App](https://github.com/slackapi/node-slack-sdk/tree/main/examples/oauth-v1/README.md). This example uses the built-in installation store
 
 ---
 
 ### Requirements
 
-This package supports Node v10 LTS and higher. It's highly recommended to use [the latest LTS version of
+This package supports Node v12 LTS and higher. It's highly recommended to use [the latest LTS version of
 node](https://github.com/nodejs/Release#release-schedule), and the documentation is written using syntax and features
 from that version.
 

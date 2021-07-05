@@ -41,7 +41,7 @@ export class InstallProvider {
     installationStore = new MemoryInstallationStore(),
     authVersion = 'v2',
     logger = undefined,
-    logLevel = LogLevel.INFO,
+    logLevel = undefined,
     clientOptions = {},
     authorizationUrl = 'https://slack.com/oauth/v2/authorize',
   }: InstallProviderOptions) {
@@ -57,7 +57,7 @@ export class InstallProvider {
         this.logger.debug('The logLevel given to OAuth was ignored as you also gave logger');
       }
     } else {
-      this.logger = getLogger('OAuth:InstallProvider', logLevel, logger);
+      this.logger = getLogger('OAuth:InstallProvider', logLevel ?? LogLevel.INFO, logger);
     }
 
     // Setup stateStore
@@ -84,6 +84,7 @@ export class InstallProvider {
     }
 
     this.clientOptions = {
+      logger,
       logLevel: this.logger.getLevel(),
       ...clientOptions,
     };
@@ -455,9 +456,13 @@ export interface InstallationStore {
     logger?: Logger): Promise<void>;
   fetchInstallation:
     (query: InstallationQuery<boolean>, logger?: Logger) => Promise<Installation<'v1' | 'v2', boolean>>;
+  // TODO :: remove optionality in v3.0
+  deleteInstallation?:
+    (query: InstallationQuery<boolean>, logger?: Logger) => Promise<void>;
 }
 
 // using a javascript object as a makeshift database for development
+// storing user tokens is not supported
 interface DevDatabase {
   [teamIdOrEnterpriseId: string]: Installation;
 }
@@ -511,6 +516,32 @@ class MemoryInstallationStore implements InstallationStore {
       return this.devDB[query.teamId] as Installation<'v1' | 'v2', false>;
     }
     throw new Error('Failed fetching installation');
+  }
+
+  public async deleteInstallation(query: InstallationQuery<boolean>, logger?: Logger): Promise<void> {
+    if (logger !== undefined) {
+      logger.warn('Deleting Access Token from DB. Please use a real Installation Store for production!');
+    }
+
+    if (query.isEnterpriseInstall && query.enterpriseId !== undefined) {
+      if (logger !== undefined) {
+        logger.debug('deleting org installation');
+      }
+
+      const { [query.enterpriseId]: _, ...devDB } = this.devDB;
+      this.devDB = devDB;
+
+    } else if (query.teamId !== undefined) {
+      if (logger !== undefined) {
+        logger.debug('deleting single team installation');
+      }
+
+      const { [query.teamId]: _, ...devDB } = this.devDB;
+      this.devDB = devDB;
+
+    } else {
+      throw new Error('Failed to delete installation');
+    }
   }
 }
 

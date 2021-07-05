@@ -1,4 +1,3 @@
-
 /*
  * Reusable shapes for argument values
  */
@@ -68,12 +67,21 @@ export interface MrkdwnElement {
   verbatim?: boolean;
 }
 
-export interface Option {
-  text: PlainTextElement | MrkdwnElement;
+export interface MrkdwnOption {
+  text: MrkdwnElement;
   value?: string;
   url?: string;
   description?: PlainTextElement;
 }
+
+export interface PlainTextOption {
+  text: PlainTextElement;
+  value?: string;
+  url?: string;
+  description?: PlainTextElement;
+}
+
+export type Option = MrkdwnOption | PlainTextOption;
 
 export interface Confirm {
   title?: PlainTextElement;
@@ -116,11 +124,11 @@ export interface MultiUsersSelect extends Action {
 export interface StaticSelect extends Action {
   type: 'static_select';
   placeholder?: PlainTextElement;
-  initial_option?: Option;
-  options?: Option[];
+  initial_option?: PlainTextOption;
+  options?: PlainTextOption[];
   option_groups?: {
     label: PlainTextElement;
-    options: Option[];
+    options: PlainTextOption[];
   }[];
   confirm?: Confirm;
 }
@@ -128,11 +136,11 @@ export interface StaticSelect extends Action {
 export interface MultiStaticSelect extends Action {
   type: 'multi_static_select';
   placeholder?: PlainTextElement;
-  initial_options?: Option[];
-  options?: Option[];
+  initial_options?: PlainTextOption[];
+  options?: PlainTextOption[];
   option_groups?: {
     label: PlainTextElement;
-    options: Option[];
+    options: PlainTextOption[];
   }[];
   max_selected_items?: number;
   confirm?: Confirm;
@@ -183,7 +191,7 @@ export interface MultiChannelsSelect extends Action {
 
 export interface ExternalSelect extends Action {
   type: 'external_select';
-  initial_option?: Option;
+  initial_option?: PlainTextOption;
   placeholder?: PlainTextElement;
   min_query_length?: number;
   confirm?: Confirm;
@@ -191,7 +199,7 @@ export interface ExternalSelect extends Action {
 
 export interface MultiExternalSelect extends Action {
   type: 'multi_external_select';
-  initial_options?: Option[];
+  initial_options?: PlainTextOption[];
   placeholder?: PlainTextElement;
   min_query_length?: number;
   max_selected_items?: number;
@@ -209,13 +217,20 @@ export interface Button extends Action {
 
 export interface Overflow extends Action {
   type: 'overflow';
-  options: Option[];
+  options: PlainTextOption[];
   confirm?: Confirm;
 }
 
 export interface Datepicker extends Action {
   type: 'datepicker';
   initial_date?: string;
+  placeholder?: PlainTextElement;
+  confirm?: Confirm;
+}
+
+export interface Timepicker extends Action {
+  type: 'timepicker';
+  initial_time?: string;
   placeholder?: PlainTextElement;
   confirm?: Confirm;
 }
@@ -274,7 +289,7 @@ export interface ContextBlock extends Block {
 
 export interface ActionsBlock extends Block {
   type: 'actions';
-  elements: (Button | Overflow | Datepicker | Select | RadioButtons | Checkboxes | Action)[];
+  elements: (Button | Overflow | Datepicker | Timepicker | Select | RadioButtons | Checkboxes | Action)[];
 }
 
 export interface DividerBlock extends Block {
@@ -285,7 +300,16 @@ export interface SectionBlock extends Block {
   type: 'section';
   text?: PlainTextElement | MrkdwnElement; // either this or fields must be defined
   fields?: (PlainTextElement | MrkdwnElement)[]; // either this or text must be defined
-  accessory?: Button | Overflow | Datepicker | Select | MultiSelect | Action | ImageElement | RadioButtons | Checkboxes;
+  accessory?: Button
+    | Overflow
+    | Datepicker
+    | Timepicker
+    | Select
+    | MultiSelect
+    | Action
+    | ImageElement
+    | RadioButtons
+    | Checkboxes;
 }
 
 export interface FileBlock extends Block {
@@ -304,7 +328,7 @@ export interface InputBlock extends Block {
   label: PlainTextElement;
   hint?: PlainTextElement;
   optional?: boolean;
-  element: Select | MultiSelect | Datepicker | PlainTextInput | RadioButtons | Checkboxes;
+  element: Select | MultiSelect | Datepicker | Timepicker | PlainTextInput | RadioButtons | Checkboxes;
   dispatch_action?: boolean;
 }
 
