@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Methods } from './methods';
-import { WebAPICallOptions } from './WebClient'
+import { WebAPICallOptions, WebAPICallResult } from './WebClient'
 
 const DEFAULT_RETRIES = 3;
 
@@ -29,6 +29,9 @@ const createPayload: Function = (params: Record<string, any>) => {
 
 
 export class GasWebClient extends Methods {
+  public filesUploadV2(options?: WebAPICallOptions | undefined): Promise<WebAPICallResult> {
+    throw new Error('Method not implemented.');
+  }
   private API_ENDPOINT = 'https://slack.com/api/'
   public readonly slackApiUrl: string;
   public readonly token?: string;
