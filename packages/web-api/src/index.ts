@@ -1,3 +1,4 @@
+/* eslint-disable */ 
 // /// <reference lib="es2017" />
 
 // export {
@@ -12,7 +13,7 @@
 //   TLSOptions,
 // } from './WebClient';
 
-export { GasWebClient } from './GasWebClient'
+export { GasWebClient } from './GasWebClient';
 
 // export { Logger, LogLevel } from './logger';
 

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Methods } from './methods';
 import { WebAPICallOptions } from './WebClient'
 
